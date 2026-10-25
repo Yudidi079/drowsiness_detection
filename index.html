@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drowsiness Detection System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#101722] text-gray-800 font-sans min-h-screen flex flex-col justify-between">
+
+  <!-- TOP BAR -->
+  <header class="bg-[#18202c] px-6 py-3 flex justify-between items-center border-b border-gray-800 text-white">
+    <div class="flex items-center gap-2">
+      <div class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center font-bold text-[10px]">
+        O
+      </div>
+      <h1 class="text-lg font-bold tracking-wide">
+        Drowsiness Detection System
+      </h1>
+    </div>
+    <button onclick="closeApp()" class="bg-[#e2e8f0] hover:bg-gray-300 text-gray-800 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1 transition border border-gray-400">
+      [Keluar] &rarr;
+    </button>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+    
+    <!-- LIVE CAMERA -->
+    <div class="md:col-span-2 bg-[#f0f3f6] rounded-lg border border-gray-300 overflow-hidden flex flex-col shadow-sm">
+      <div class="bg-[#6c7a89] px-4 py-2 font-bold text-white text-sm flex justify-between items-center">
+        <span>Live Camera</span>
+        <span id="active_profile_badge" class="text-xs bg-[#57606f] px-2.5 py-0.5 rounded text-white font-normal border border-gray-500">
+          Profil: Standar (EAR 0.25)
+        </span>
+      </div>
+      <div class="relative flex-1 bg-[#e2e8f0] flex flex-col items-center justify-center overflow-hidden min-h-[420px] p-4 text-center">
+        <video id="webcam" class="hidden" playsinline></video>
+        <canvas id="output_canvas" class="w-full h-full object-contain hidden scale-x-[-1]"></canvas>
+        <div id="cam_placeholder" class="flex flex-col items-center justify-center gap-3">
+          <svg class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <p class="text-slate-800 font-bold text-sm">Kamera belum aktif</p>
+            <p class="text-slate-600 italic text-xs mt-0.5">klik tombol Start Kamera untuk memulai</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL STATUS & KONTROL -->
+    <div class="flex flex-col gap-3">
+      <div class="bg-[#f0f3f6] rounded-lg border border-gray-300 overflow-hidden shadow-sm">
+        <div class="bg-[#6c7a89] px-4 py-1.5 text-center font-bold text-xs text-white tracking-wider">
+          Panel Status
+        </div>
+        <div class="p-3 space-y-2 text-xs">
+          <div class="bg-[#3c434d] px-3 py-2 rounded-md text-white flex justify-between items-center">
+            <span>EAR (mata) : <strong id="ear_val" class="ml-1">-</strong></span>
+            <span id="ear_stat" class="text-gray-300">Normal</span>
+          </div>
+          <div class="bg-[#3c434d] px-3 py-2 rounded-md text-white flex justify-between items-center">
+            <span>MAR (mulut) : <strong id="mar_val" class="ml-1">-</strong></span>
+            <span id="mar_stat" class="text-gray-300">Normal</span>
+          </div>
+          <div class="bg-[#3c434d] px-3 py-2 rounded-md text-white flex justify-between items-center">
+            <span>Kepala : <strong id="head_val" class="ml-1">-</strong></span>
+            <span id="head_stat" class="text-gray-300">Normal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-[#f0f3f6] rounded-lg border border-gray-300 p-3 shadow-sm">
+        <p class="text-gray-700 font-bold text-xs mb-1.5">STATUS SISTEM</p>
+        <div id="status_box" class="bg-[#f39c12] p-2.5 rounded-md text-center transition-colors">
+          <p id="status_text" class="text-xs font-bold text-white">[KAMERA NONAKTIF]</p>
+        </div>
+      </div>
+
+      <div class="bg-[#f0f3f6] rounded-lg border border-gray-300 p-3 text-xs shadow-sm">
+        <p class="text-gray-700 font-bold mb-1.5">PENGATURAN ALARM</p>
+        <div class="flex gap-2 mb-2">
+          <select id="alarm_select" onchange="changeAlarmType(this.value)" class="flex-1 bg-[#57606f] text-white border border-gray-500 rounded px-2 py-1.5 focus:outline-none text-xs">
+            <option value="beep">[Beep Standar]</option>
+            <option value="high">[Pitch Tinggi]</option>
+            <option value="siren">[Sirine Darurat]</option>
+            <option value="custom">[Upload Audio .mp3]</option>
+          </select>
+          <button onclick="testAlarm()" class="bg-[#57606f] hover:bg-[#4b525d] text-white px-4 py-1.5 rounded font-semibold transition text-xs border border-gray-500">
+            Tes
+          </button>
+        </div>
+        <div id="custom_audio_container" class="hidden">
+          <input type="file" id="audio_file_input" accept="audio/*" onchange="handleAudioUpload(event)" class="w-full text-gray-700 bg-white rounded border border-gray-400 cursor-pointer file:mr-2 file:py-1 file:px-2 file:border-0 file:bg-[#57606f] file:text-white file:text-xs">
+        </div>
+      </div>
+
+      <div class="bg-[#f0f3f6] rounded-lg border border-gray-300 p-3 text-xs shadow-sm">
+        <p class="text-gray-700 font-bold mb-1.5">KONTROL SESI</p>
+        <button id="btn_toggle" onclick="toggleCamera()" class="w-full bg-[#2ecc71] hover:bg-[#27ae60] text-white font-bold py-2.5 rounded-md mb-2 transition text-sm flex items-center justify-center gap-1">
+          <span>&#9654;</span> Start Kamera
+        </button>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <button onclick="openParamModal()" class="bg-[#4a90e2] hover:bg-[#357abd] text-white font-semibold py-2 rounded transition text-xs">
+            [Atur Parameter]
+          </button>
+          <button onclick="openLogModal()" class="bg-[#4a90e2] hover:bg-[#357abd] text-white font-semibold py-2 rounded transition text-xs">
+            [Lihat log]
+          </button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <button onclick="openChartModal()" class="bg-[#4a90e2] hover:bg-[#357abd] text-white font-semibold py-2 rounded transition text-xs">
+            [Grafik Tren]
+          </button>
+          <button onclick="resetLogData()" class="bg-[#4a90e2] hover:bg-[#357abd] text-white font-semibold py-2 rounded transition text-xs">
+            [Reset Grafik]
+          </button>
+        </div>
+        <button onclick="closeApp()" class="w-full bg-[#57606f] hover:bg-[#4b525d] text-white font-semibold py-2 rounded transition text-xs">
+          [Akhiri Sesi]
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL PARAMETER -->
+  <div id="param_modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+    <div class="bg-[#f0f3f6] border border-gray-400 rounded-lg max-w-md w-full overflow-hidden text-sm shadow-2xl">
+      <div class="bg-[#6c7a89] px-5 py-3 flex justify-between items-center font-bold text-white">
+        <h3>PROFIL BENTUK MATA & PARAMETER</h3>
+        <button onclick="closeParamModal()" class="hover:text-gray-300 font-mono text-base">[X]</button>
+      </div>
+      <div class="p-5 space-y-4 text-gray-800">
+        <div>
+          <label for="eye_profile_select" class="block text-xs font-bold text-gray-700 mb-1">
+            Pilih Tipe Mata:
+          </label>
+          <select id="eye_profile_select" onchange="handleEyeProfileChange(this.value)" class="w-full bg-white border border-gray-400 text-gray-800 rounded p-2 text-xs focus:outline-none">
+            <option value="0.25">Standar (Default EAR 0.25)</option>
+            <option value="0.15">Mata Sipit (EAR 0.15)</option>
+            <option value="custom">Manual / Kustom</option>
+          </select>
+        </div>
+        <div id="custom_ear_box" class="hidden">
+          <label class="block text-xs text-gray-600 mb-1">Masukkan Nilai EAR Kustom:</label>
+          <input type="number" id="custom_ear_input" step="0.01" min="0.05" max="0.5" placeholder="0.18" oninput="syncCustomEar(this.value)" class="w-full bg-white border border-gray-400 rounded p-2 text-xs focus:outline-none">
+        </div>
+        <div class="bg-white p-3 rounded-md border border-gray-300 space-y-2">
+          <p class="text-xs font-bold text-gray-700 mb-1">SETTING THRESHOLD DETEKSI</p>
+          <div class="flex justify-between items-center">
+            <label class="text-xs text-gray-600">EAR (Mata Terpejam):</label>
+            <input type="number" step="0.01" id="input_ear" class="bg-[#f0f3f6] border border-gray-400 rounded px-2 py-1 w-20 text-right text-xs">
+          </div>
+          <div class="flex justify-between items-center">
+            <label class="text-xs text-gray-600">MAR (Menguap):</label>
+            <input type="number" step="0.01" id="input_mar" class="bg-[#f0f3f6] border border-gray-400 rounded px-2 py-1 w-20 text-right text-xs">
+          </div>
+          <div class="flex justify-between items-center">
+            <label class="text-xs text-gray-600">Batas Frame Berturut:</label>
+            <input type="number" id="input_frames" class="bg-[#f0f3f6] border border-gray-400 rounded px-2 py-1 w-20 text-right text-xs">
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+          <div class="bg-white p-2 rounded border border-gray-300">
+            <p class="text-gray-500 text-[10px]">Kalibrasi EAR</p>
+            <p id="box_ear_display" class="font-bold text-teal-600 mt-0.5">0.25 - Normal</p>
+          </div>
+          <div class="bg-white p-2 rounded border border-gray-300">
+            <p class="text-gray-500 text-[10px]">Kalibrasi MAR</p>
+            <p id="box_mar_display" class="font-bold text-teal-600 mt-0.5">0.55 - Normal</p>
+          </div>
+          <div class="bg-white p-2 rounded border border-gray-300">
+            <p class="text-gray-500 text-[10px]">Batas Frame</p>
+            <p id="box_frame_display" class="font-bold text-gray-800 mt-0.5">60 Frames</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-[#e2e7ec] px-5 py-3 flex gap-2 border-t border-gray-300">
+        <button onclick="closeParamModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 py-2 rounded font-semibold text-xs text-white transition">
+          Batal
+        </button>
+        <button onclick="saveParams()" class="flex-1 bg-[#4a90e2] hover:bg-[#357abd] py-2 rounded font-bold text-xs text-white transition">
+          SIMPAN PROFIL
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LOG -->
+  <div id="log_modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+    <div class="bg-[#f0f3f6] border border-gray-400 rounded-lg max-w-4xl w-full overflow-hidden text-sm shadow-2xl">
+      <div class="bg-[#6c7a89] px-5 py-3 flex justify-between items-center font-bold text-white">
+        <h3>RIWAYAT CATATAN DETEKSI</h3>
+        <button onclick="closeLogModal()" class="hover:text-gray-300 font-mono text-base">[X]</button>
+      </div>
+      <div class="bg-[#e2e7ec] px-5 py-2.5 flex justify-between items-center text-xs border-b border-gray-300 text-gray-800">
+        <div>ID Sesi Aktif : <strong id="active_session_label" class="text-blue-700">SESI-001</strong></div>
+        <button onclick="downloadCSV()" class="bg-[#57606f] hover:bg-[#4b525d] text-white font-semibold px-3 py-1.5 rounded transition text-xs">
+          [ Export CSV ]
+        </button>
+      </div>
+      <div class="p-4 overflow-x-auto max-h-[350px]">
+        <table class="w-full text-xs text-center border-collapse">
+          <thead>
+            <tr class="bg-[#6c7a89] text-white">
+              <th class="p-2 border border-gray-400">No</th>
+              <th class="p-2 border border-gray-400">ID LOG</th>
+              <th class="p-2 border border-gray-400">ID SESI</th>
+              <th class="p-2 border border-gray-400">WAKTU KEJADIAN</th>
+              <th class="p-2 border border-gray-400">JENIS KEJADIAN</th>
+              <th class="p-2 border border-gray-400">TIPE MATA</th>
+              <th class="p-2 border border-gray-400">DURASI</th>
+              <th class="p-2 border border-gray-400">STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="log_table_body"></tbody>
+        </table>
+      </div>
+      <div class="bg-[#e2e7ec] px-5 py-2.5 flex justify-between items-center text-xs text-gray-600 border-t border-gray-300">
+        <span id="log_count_info">Menampilkan 0 - 0 dari 0 data</span>
+        <div class="flex gap-1 items-center">
+          <button class="bg-gray-300 px-2 py-1 rounded text-gray-800">&lt;</button>
+          <span class="px-2 font-bold text-gray-800">[1]</span>
+          <button class="bg-gray-300 px-2 py-1 rounded text-gray-800">&gt;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL GRAFIK -->
+  <div id="chart_modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+    <div class="bg-[#f0f3f6] border border-gray-400 rounded-lg max-w-4xl w-full p-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b border-gray-300 pb-2">
+        <h3 class="text-base font-bold text-gray-800">ANALISIS TREN KANTUK & MENGUAP</h3>
+        <div class="flex gap-2">
+          <button onclick="resetLogData()" class="bg-[#e74c3c] hover:bg-[#c0392b] text-white text-xs font-bold px-3 py-1.5 rounded">
+            Reset Data
+          </button>
+          <button onclick="closeChartModal()" class="bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold px-3 py-1.5 rounded">
+            Tutup
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-3 rounded border border-gray-300">
+          <p class="text-xs text-center font-bold mb-2 text-gray-700">Frekuensi Kejadian per Jam</p>
+          <canvas id="bar_chart"></canvas>
+        </div>
+        <div class="bg-white p-3 rounded border border-gray-300">
+          <p class="text-xs text-center font-bold mb-2 text-gray-700">Distribusi Total Kejadian</p>
+          <canvas id="pie_chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

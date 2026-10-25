@@ -1,0 +1,5 @@
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #e2e7ec; }
+::-webkit-scrollbar-thumb { background: #6c7a89; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #57606f; }
+button, select, input { transition: all 0.15s ease-in-out; }
