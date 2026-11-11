@@ -15,6 +15,7 @@ EAR_CONSEC_FRAMES = 12
 MAR_THRESHOLD = 0.60  
 YAWN_CONSEC_FRAMES = 12   
 
+# Lokasi file log catatan event dan file audio peringatan alarm
 LOG_FILE = "drowsiness_log.csv"
 ALARM_FILE = "alarm.wav"  
 
@@ -70,6 +71,7 @@ def log_event(event_type, ear, mar):
 pygame.mixer.init()
 alarm_sound = None
 
+# Memuat file audio alarm jika file tersedia
 if os.path.exists(ALARM_FILE):
     try:
         alarm_sound = pygame.mixer.Sound(ALARM_FILE)
@@ -79,6 +81,7 @@ if os.path.exists(ALARM_FILE):
 else:
     print(f"[INFO] File '{ALARM_FILE}' tidak ditemukan.")
 
+# Inisialisasi model MediaPipe Face Mesh untuk pelacakan wajah
 face_mesh = mp_face_mesh.FaceMesh(
     max_num_faces=1,
     refine_landmarks=True,
@@ -86,11 +89,13 @@ face_mesh = mp_face_mesh.FaceMesh(
     min_tracking_confidence=0.5,
 )
 
+# Inisialisasi input stream dari kamera
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("[ERROR] Kamera tidak terdeteksi!")
     sys.exit()
 
+# Inisialisasi variabel status dan counter deteksi kantuk/menguap
 ear_counter = 0
 yawn_counter = 0
 alarm_playing = False
@@ -98,11 +103,13 @@ last_log_time = 0
 
 print("Tekan 'q' pada jendela video untuk keluar.")
 
+# Loop utama untuk membaca dan memproses frame kamera secara kontinu
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
+    # Membalikkan tampilan gambar (mirror effect) dan mengambil dimensi frame
     frame = cv2.flip(frame, 1)
     h, w, _ = frame.shape
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -111,6 +118,7 @@ while True:
     status_text = "STATUS: NORMAL"
     status_color = (0, 255, 0)
 
+    # Mengekstrak landmark wajah jika berhasil terdeteksi oleh MediaPipe
     if results.multi_face_landmarks:
         face_landmarks = results.multi_face_landmarks[0].landmark
 
@@ -119,6 +127,7 @@ while True:
         avg_ear = (left_ear + right_ear) / 2.0
         mar = calculate_mar(face_landmarks, w, h)
 
+        # Evaluasi kondisi menguap berdasarkan batas ambang MAR
         if mar > MAR_THRESHOLD:
             yawn_counter += 1
             if yawn_counter >= YAWN_CONSEC_FRAMES:
@@ -128,16 +137,19 @@ while True:
         else:
             yawn_counter = 0
 
+        # Evaluasi kondisi mengantuk berdasarkan batas ambang EAR
         if avg_ear < EAR_THRESHOLD:
             ear_counter += 1
             if ear_counter >= EAR_CONSEC_FRAMES:
                 status_text = "MENGANTUK"
                 status_color = (0, 0, 255)
 
+                # Memutar suara alarm peringatan jika terindikasi mengantuk
                 if alarm_sound and not alarm_playing:
                     alarm_sound.play(-1)
                     alarm_playing = True
 
+                # Mencatat event mengantuk ke log dengan interval minimal 1 detik
                 current_time = cv2.getTickCount() / cv2.getTickFrequency()
                 if current_time - last_log_time > 1.0:
                     log_event("MENGANTUK", avg_ear, mar)
@@ -189,8 +201,11 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
-
+        
+# Hentikan suara alarm jika masih menyala saat program ditutup
 if alarm_sound and alarm_playing:
     alarm_sound.stop()
+    
+# Pelepasan resource kamera dan penutupan jendela pemrosesan
 cap.release()
 cv2.destroyAllWindows()
