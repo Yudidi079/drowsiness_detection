@@ -1,10 +1,103 @@
+// --- BACKGROUND NEURAL / CONSTELLATION PARTICLES EFFECT ---
+const bgCanvas = document.createElement('canvas');
+bgCanvas.id = 'bg_canvas';
+bgCanvas.className = 'fixed inset-0 pointer-events-none z-0 opacity-40';
+document.body.prepend(bgCanvas);
+
+const ctxBg = bgCanvas.getContext('2d');
+let particlesArray = [];
+
+function resizeBgCanvas() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeBgCanvas);
+resizeBgCanvas();
+
+const mouse = { x: null, y: null, radius: 150 };
+window.addEventListener('mousemove', (event) => {
+  mouse.x = event.clientX;
+  mouse.y = event.clientY;
+});
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * bgCanvas.width;
+    this.y = Math.random() * bgCanvas.height;
+    this.vx = (Math.random() - 0.5) * 0.8;
+    this.vy = (Math.random() - 0.5) * 0.8;
+    this.size = Math.random() * 2 + 1;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0 || this.x > bgCanvas.width) this.vx = -this.vx;
+    if (this.y < 0 || this.y > bgCanvas.height) this.vy = -this.vy;
+  }
+  draw() {
+    ctxBg.fillStyle = '#d4b46b';
+    ctxBg.beginPath();
+    ctxBg.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctxBg.fill();
+  }
+}
+
+function initParticles() {
+  particlesArray = [];
+  let numParticles = (bgCanvas.width * bgCanvas.height) / 15000;
+  for (let i = 0; i < numParticles; i++) {
+    particlesArray.push(new Particle());
+  }
+}
+initParticles();
+
+function animateParticles() {
+  ctxBg.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  
+  for (let i = 0; i < particlesArray.length; i++) {
+    particlesArray[i].update();
+    particlesArray[i].draw();
+
+    for (let j = i; j < particlesArray.length; j++) {
+      let dx = particlesArray[i].x - particlesArray[j].x;
+      let dy = particlesArray[i].y - particlesArray[j].y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 100) {
+        ctxBg.strokeStyle = `rgba(212, 180, 107, ${1 - distance / 100})`;
+        ctxBg.lineWidth = 0.5;
+        ctxBg.beginPath();
+        ctxBg.moveTo(particlesArray[i].x, particlesArray[i].y);
+        ctxBg.lineTo(particlesArray[j].x, particlesArray[j].y);
+        ctxBg.stroke();
+      }
+    }
+
+    let mdx = particlesArray[i].x - mouse.x;
+    let mdy = particlesArray[i].y - mouse.y;
+    let mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+    if (mdist < mouse.radius) {
+      ctxBg.strokeStyle = `rgba(59, 130, 246, ${1 - mdist / mouse.radius})`;
+      ctxBg.lineWidth = 0.6;
+      ctxBg.beginPath();
+      ctxBg.moveTo(particlesArray[i].x, particlesArray[i].y);
+      ctxBg.lineTo(mouse.x, mouse.y);
+      ctxBg.stroke();
+    }
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+
+// --- KODE UTAMA SISTEM DETEKSI KANTUK ---
 const $ = id => document.getElementById(id);
 const RIGHT_EYE = [33, 160, 158, 133, 153, 144], LEFT_EYE = [362, 385, 387, 263, 373, 380], MOUTH = [61, 291, 0, 17, 84, 314, 13, 14];
 
 let earThreshold = 0.25, marThreshold = 0.60, consecFrames = 12, currentEyeType = "Standar", activeSessionId = "SESI-001";
 let camera = null, isCameraOn = false, frameCounter = 0, lastAlarmTime = 0, lastLogTime = 0, audioCtx = null, alarmType = 'beep', customAudioElement = null, barChartInstance = null, pieChartInstance = null;
 
-const videoElement = $('webcam'), canvasElement = $('output_canvas'), canvasCtx = canvasElement.getContext('2d'), camPlaceholder =$('cam_placeholder');
+const videoElement = $('webcam'), canvasElement = $('output_canvas'), canvasCtx = canvasElement.getContext('2d'), camPlaceholder = $('cam_placeholder');
 
 document.addEventListener('DOMContentLoaded', openParamModal);
 window.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'q') closeApp(); });
@@ -50,7 +143,8 @@ function saveParams() {
     currentEyeType = pSelect === '0.25' ? "Standar" : (pSelect === '0.15' ? "Sipit" : "Kustom");
   }
   marThreshold = parseFloat($('input_mar').value);
-  consecFrames = parseInt($('input_frames').value);$('active_profile_badge').innerText = `Profil: ${currentEyeType} (EAR ${earThreshold})`;
+  consecFrames = parseInt($('input_frames').value);
+  $('active_profile_badge').innerText = `Profil: ${currentEyeType} (EAR ${earThreshold})`;
   alert(`Profil & Parameter berhasil disimpan!\nProfil: ${currentEyeType}\nEAR: ${earThreshold} | MAR: ${marThreshold} | Frame: ${consecFrames}`);
   closeParamModal();
 }
@@ -100,10 +194,11 @@ function testAlarm() { initAudio(); lastAlarmTime = 0; playAlarm(); }
 const faceMesh = new FaceMesh({ 
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}` 
 });
-faceMesh.setOptions({ maxNumFaces: 1,
-   refineLandmarks: true,
-    minDetectionConfidence: 0.5,
-     minTrackingConfidence: 0.5 
+faceMesh.setOptions({ 
+  maxNumFaces: 1,
+  refineLandmarks: true,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5 
 });
 faceMesh.onResults(onResults);
 
@@ -157,14 +252,20 @@ function logEvent(earVal, marVal, statusText) {
 }
 
 function setStat(id, text, isError) {
-  $(id).innerText = text;
-  $(id).className = isError ? "text-red-400 font-bold" : "text-green-400";
+  const el = $(id);
+  el.innerText = text;
+  if (isError) {
+    el.className = "text-rose-300 bg-rose-500/20 border border-rose-400/40 px-2.5 py-0.5 rounded-lg font-bold text-xs";
+  } else {
+    el.className = "text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-lg font-bold text-xs";
+  }
 }
 
 function onResults(results) {
   canvasElement.width = videoElement.videoWidth || 640;
   canvasElement.height = videoElement.videoHeight || 480;
-  canvasCtx.save(); canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.save(); 
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
   canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
   if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
@@ -173,7 +274,8 @@ function onResults(results) {
     const mar = calculateMAR(MOUTH, lm), headPose = estimateHeadPose(lm, w, h);
 
     $('ear_val').innerText = avgEar.toFixed(2);
-    $('mar_val').innerText = mar.toFixed(2);$('head_val').innerText = headPose;
+    $('mar_val').innerText = mar.toFixed(2);
+    $('head_val').innerText = headPose;
 
     if (avgEar < earThreshold) { frameCounter++; setStat('ear_stat', "Terpejam", true); }
     else { frameCounter = 0; setStat('ear_stat', "Normal", false); }
@@ -182,70 +284,92 @@ function onResults(results) {
     setStat('mar_stat', isYawning ? "Menguap" : "Normal", isYawning);
     setStat('head_stat', headPose === "Lurus Depan" ? "Normal" : "Miring/Paling", headPose !== "Lurus Depan");
 
-    const statusBox = $('status_box'), statusText =$('status_text');
+    const statusBox = $('status_box'), statusText = $('status_text');
     let msg = isDrowsy && isYawning ? "MENGANTUK & MENGUAP" : (isDrowsy ? "MENGANTUK" : (isYawning ? "MENGUAP" : "NORMAL"));
 
     if (msg !== "NORMAL") {
       statusText.innerText = `[ ${msg} ]`;
-      statusBox.className = `bg-[${isDrowsy ? '#e74c3c' : '#e67e22'}] p-2.5 rounded-md text-center transition-colors`;
+      statusText.className = "text-xs font-extrabold text-white tracking-wide"; // Ukuran proporsional & putih
+      statusBox.className = `bg-[${isDrowsy ? '#e74c3c' : '#e67e22'}] p-2 rounded-xl text-center transition-colors shadow-md`;
       if (isDrowsy) playAlarm();
       logEvent(avgEar, mar, msg);
     } else {
       statusText.innerText = "[ NORMAL ]";
-      statusBox.className = "bg-[#2ecc71] p-2.5 rounded-md text-center transition-colors";
+      statusText.className = "text-xs font-extrabold text-white tracking-wide"; // Ukuran proporsional & putih
+      statusBox.className = "bg-[#2ecc71] p-2 rounded-xl text-center transition-colors shadow-md";
     }
 
     canvasCtx.fillStyle = '#00FF00';
     [...LEFT_EYE, ...RIGHT_EYE, ...MOUTH].forEach(idx => {
-      canvasCtx.beginPath(); canvasCtx.arc(lm[idx].x * w, lm[idx].y * h, 1.5, 0, 2 * Math.PI); canvasCtx.fill();
+      canvasCtx.beginPath(); 
+      canvasCtx.arc(lm[idx].x * w, lm[idx].y * h, 1.5, 0, 2 * Math.PI); 
+      canvasCtx.fill();
     });
   }
   canvasCtx.restore();
 }
 
 function toggleCamera() {
-  const btn = $('btn_toggle'), statusBox = $('status_box'), statusText =$('status_text');
+  const btn = $('btn_toggle'), statusBox = $('status_box'), statusText = $('status_text');
   if (!isCameraOn) {
     initAudio();
-    camera = new Camera(videoElement, { 
-      onFrame: async () => { 
-        await faceMesh.send({ image: videoElement }); }, 
-        width: 640, height: 480 });
-    camera.start(); 
-    isCameraOn = true;
-    btn.innerHTML = "<span>&#9632;</span> Stop Kamera";
-    btn.className = "w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-2.5 rounded-md mb-2 transition text-sm flex items-center justify-center gap-1";
-    camPlaceholder.classList.add('hidden'); canvasElement.classList.remove('hidden');
-    statusText.innerText = "[ SISTEM MENDETEKSI - KAMERA AKTIF ]";
-    statusBox.className = "bg-[#2ecc71] p-2.5 rounded-md text-center transition-colors";
+    
+    if (!camera) {
+      camera = new Camera(videoElement, { 
+        onFrame: async () => { 
+          if (isCameraOn) {
+            await faceMesh.send({ image: videoElement }); 
+          }
+        }, 
+        width: 640, 
+        height: 480 
+      });
+    }
+    
+    camera.start().then(() => {
+      isCameraOn = true;
+      btn.innerHTML = "<span>&#9632;</span> Stop Kamera";
+      btn.className = "w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-2.5 rounded-md mb-2 transition text-sm flex items-center justify-center gap-1";
+      camPlaceholder.classList.add('hidden'); 
+      canvasElement.classList.remove('hidden');
+      statusText.innerText = "[ SISTEM MENDETEKSI - KAMERA AKTIF ]";
+      statusText.className = "text-xs font-extrabold text-white tracking-wide";
+      statusBox.className = "bg-[#2ecc71] p-2 rounded-xl text-center transition-colors shadow-md";
+    }).catch(err => {
+      console.error("Gagal memulai kamera:", err);
+      alert("Tidak dapat mengakses kamera. Pastikan izin kamera aktif.");
+    });
+
   } else {
     if (camera) camera.stop();
     isCameraOn = false;
     btn.innerHTML = "<span>&#9654;</span> Start Kamera";
     btn.className = "w-full bg-[#2ecc71] hover:bg-[#27ae60] text-white font-bold py-2.5 rounded-md mb-2 transition text-sm flex items-center justify-center gap-1";
-    camPlaceholder.classList.remove('hidden'); canvasElement.classList.add('hidden');
+    camPlaceholder.classList.remove('hidden'); 
+    canvasElement.classList.add('hidden');
     statusText.innerText = "[ KAMERA NONAKTIF ]";
-    statusBox.className = "bg-[#f39c12] p-2.5 rounded-md text-center transition-colors";
+    statusText.className = "text-xs font-extrabold text-white tracking-wide";
+    statusBox.className = "bg-[#f39c12] p-2 rounded-xl text-center transition-colors shadow-md";
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    $('ear_val').innerText = $('mar_val').innerText =$('head_val').innerText = "-";
+    $('ear_val').innerText = $('mar_val').innerText = $('head_val').innerText = "-";
   }
 }
 
 function openLogModal() {
   const logs = JSON.parse(localStorage.getItem('drowsiness_logs') || '[]'), tbody = $('log_table_body');
-  tbody.innerHTML = logs.length === 0 ? `<tr><td colspan="8" class="p-4 text-gray-500 italic">Belum ada riwayat catatan deteksi.</td></tr>` : '';
+  tbody.innerHTML = logs.length === 0 ? `<tr><td colspan="8" class="p-4 text-slate-400 italic">Belum ada riwayat catatan deteksi.</td></tr>` : '';
 
   logs.forEach((l, i) => {
     tbody.innerHTML += `
-      <tr class="bg-white hover:bg-gray-100 transition">
-        <td class="p-2 border border-gray-300">${i + 1}</td>
-        <td class="p-2 border border-gray-300 font-mono">${l.idLog || 'LOG-' + (i+1)}</td>
-        <td class="p-2 border border-gray-300 font-mono">${l.idSesi || activeSessionId}</td>
-        <td class="p-2 border border-gray-300">${l.timestamp}</td>
-        <td class="p-2 border border-gray-300">${l.jenis}</td>
-        <td class="p-2 border border-gray-300">${l.tipeMata || 'Standar'}</td>
-        <td class="p-2 border border-gray-300">${l.durasi || '3.0 Detik'}</td>
-        <td class="p-2 border border-gray-300"><span class="text-${l.status === 'Critical' ? 'red' : 'yellow'}-600 font-bold">${l.status}</span></td>
+      <tr class="bg-[#141d33] hover:bg-[#1b2642] transition border-b border-[#283556] text-slate-200">
+        <td class="p-2.5 border border-[#283556]">${i + 1}</td>
+        <td class="p-2.5 border border-[#283556] font-mono text-[#d4b46b]">${l.idLog || 'LOG-' + (i+1)}</td>
+        <td class="p-2.5 border border-[#283556] font-mono">${l.idSesi || activeSessionId}</td>
+        <td class="p-2.5 border border-[#283556]">${l.timestamp}</td>
+        <td class="p-2.5 border border-[#283556] font-bold">${l.jenis}</td>
+        <td class="p-2.5 border border-[#283556]">${l.tipeMata || 'Standar'}</td>
+        <td class="p-2.5 border border-[#283556]">${l.durasi || '3.0 Detik'}</td>
+        <td class="p-2.5 border border-[#283556]"><span class="px-2.5 py-1 rounded-lg text-xs font-bold ${l.status === 'Critical' ? 'bg-rose-500/20 text-rose-300 border border-rose-400/40' : 'bg-amber-500/20 text-amber-300 border border-amber-400/40'}">${l.status}</span></td>
       </tr>`;
   });
   $('log_count_info').innerText = logs.length ? `Menampilkan 1 - ${logs.length} dari ${logs.length} data` : 'Menampilkan 0 data';
@@ -258,8 +382,7 @@ function downloadCSV() {
   const logs = JSON.parse(localStorage.getItem('drowsiness_logs') || '[]');
   if (!logs.length) return alert('Belum ada data log tersimpan.');
   let csv = "No,ID LOG,ID SESI,WAKTU KEJADIAN,JENIS KEJADIAN,TIPE MATA,DURASI,STATUS,EAR,MAR\n";
-  logs.forEach((l, i) => { csv += `${i + 1},${l.idLog || 'LOG-'+(i+1)},${l.idSesi || activeSessionId},
-  ${l.timestamp},${l.jenis},${l.tipeMata || 'Standar'},${l.durasi || '3.0 Detik'},${l.status},${l.ear},${l.mar}\n`; });
+  logs.forEach((l, i) => { csv += `${i + 1},${l.idLog || 'LOG-'+(i+1)},${l.idSesi || activeSessionId},${l.timestamp},${l.jenis},${l.tipeMata || 'Standar'},${l.durasi || '3.0 Detik'},${l.status},${l.ear},${l.mar}\n`; });
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = `drowsiness_log_${new Date().toISOString().slice(0,10)}.csv`; a.click();
 }

@@ -1,5 +1,4 @@
 import sys
-
 import cv2
 import pygame
 from mediapipe.python.solutions import drawing_utils as mp_drawing
@@ -8,7 +7,7 @@ from mediapipe.python.solutions import face_mesh as mp_face_mesh
 try:
     pygame.mixer.init()
     print("[OK] Pygame Audio Mixer aktif.")
-except Exception as e:  # noqa: BLE001
+except Exception as e:
     print(f"[ERROR] Pygame Audio gagal: {e}")
 
 try:
@@ -19,7 +18,7 @@ try:
         min_tracking_confidence=0.5,
     )
     print("[OK] MediaPipe Face Mesh berhasil diinisialisasi.")
-except Exception as e:  # noqa: BLE001
+except Exception as e:
     print(f"[ERROR] MediaPipe Face Mesh gagal: {e}")
     sys.exit()
 
@@ -38,9 +37,11 @@ while True:
         break
 
     frame = cv2.flip(frame, 1)
+    h, w, _ = frame.shape
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = face_mesh.process(rgb_frame)
 
+    # 1. Gambar Mesh Wajah (Oranye Warm & Earthy BGR)
     if results.multi_face_landmarks:
         for face_landmarks in results.multi_face_landmarks:
             mp_drawing.draw_landmarks(
@@ -49,19 +50,24 @@ while True:
                 connections=mp_face_mesh.FACEMESH_TESSELATION,
                 landmark_drawing_spec=None,
                 connection_drawing_spec=mp_drawing.DrawingSpec(
-                    color=(0, 255, 0), thickness=1, circle_radius=1
+                    color=(12, 88, 234), thickness=1, circle_radius=1
                 ),
             )
 
-    cv2.putText(
-        frame,
-        "Tekan 'q' untuk keluar.",
-        (30, 50),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.6,
-        (0, 255, 0),
-        2,
-    )
+    # 2. Overlay Top Bar Header Soft Warm Glass
+    sub_img = frame[0:50, 0:w]
+    warm_rect = cv2.rectangle(sub_img.copy(), (0, 0), (w, 50), (237, 247, 255), -1)
+    frame[0:50, 0:w] = cv2.addWeighted(sub_img, 0.2, warm_rect, 0.8, 0)
+    cv2.line(frame, (0, 50), (w, 50), (170, 215, 254), 1)
+
+    cv2.putText(frame, "TEST SETUP SYSTEM", (20, 32), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (18, 45, 124), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Tekan 'q' untuk keluar", (w - 180, 32), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (12, 88, 234), 1, cv2.LINE_AA)
+
+    # 3. Status Badge Kamera Aktif (Hijau Keselamatan)
+    cv2.rectangle(frame, (20, h - 45), (180, h - 15), (237, 247, 255), -1)
+    cv2.rectangle(frame, (20, h - 45), (180, h - 15), (170, 215, 254), 1)
+    cv2.circle(frame, (35, h - 30), 5, (80, 210, 120), -1)
+    cv2.putText(frame, "CAMERA ACTIVE", (50, h - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (16, 125, 40), 1, cv2.LINE_AA)
 
     cv2.imshow("Test Setup Drowsiness Detection", frame)
 

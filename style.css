@@ -1,5 +1,78 @@
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #e2e7ec; }
-::-webkit-scrollbar-thumb { background: #6c7a89; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #57606f; }
-button, select, input { transition: all 0.15s ease-in-out; }
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 50% -20%, #1d3568 0%, #101932 50%, #080d1b 100%);
+  color: #f8fafc;
+}
+
+/* Efek pendaran halus pada card panel */
+.card-glow {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-glow:hover {
+  box-shadow: 0 15px 35px -10px rgba(212, 180, 107, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar Custom */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c1326;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1b2642;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 180, 107, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4b46b;
+}
+
+/* Micro-interactions */
+button, select, input, a {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0px) scale(0.97);
+}
+
+/* Modal Smooth Entrance */
+.modal-animate {
+  animation: modalBounce 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalBounce {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+#output_canvas, #cam_placeholder {
+  transition: opacity 0.3s ease-in-out;
+}
