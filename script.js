@@ -127,8 +127,8 @@ function syncCustomEar(val) {
 }
 
 function updateModalBoxes() {
-  $('box_ear_display').innerText = `${parseFloat($('input_ear').value) || 0.25} - Normal`;
-  $('box_mar_display').innerText = `${parseFloat($('input_mar').value) || 0.60} - Normal`;
+  $('box_ear_display').innerText = `${parseFloat($('input_ear').value) || 0.25} Normal`;
+  $('box_mar_display').innerText = `${parseFloat($('input_mar').value) || 0.60} Normal`;
   $('box_frame_display').innerText = `${parseInt($('input_frames').value) || 60} Frames`;
 }
 
@@ -551,21 +551,30 @@ function closeApp() {
   });
 }
 
-// Fungsi untuk menyambut pengguna saat halaman pertama kali dimuat
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const text = "Selamat datang di website Drowwsiness Detection System. Harap berkendara dengan hati-hati.";
-      
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'id-ID'; 
-        utterance.rate = 1.2;     
-        utterance.pitch = 1.2;   
-        
-        
-        window.speechSynthesis.speak(utterance);
-      }
-    }, 100); 
-  });
+// --- FITUR SUARA SAMBUTAN OTOMATIS (BISA DI HP & LAPTOP) ---
+let hasWelcomed = false;
 
-  
+function playWelcomeVoice() {
+  if (hasWelcomed) return;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const text = "Selamat datang di website Drowsiness Detection System. Harap berkendara dengan hati-hati.";
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'id-ID'; 
+    utterance.rate = 1.2;     
+    utterance.pitch = 1.2;   
+    window.speechSynthesis.speak(utterance);
+    hasWelcomed = true;
+  }
+}
+
+// Coba putar otomatis saat halaman dimuat (untuk Laptop/PC)
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    playWelcomeVoice();
+  }, 100);
+});
+
+// Pemicu pada sentuhan/klik pertama di layar mana saja (Mengatasi blokir autoplay di HP)
+window.addEventListener('click', playWelcomeVoice, { once: true });
+window.addEventListener('touchstart', playWelcomeVoice, { once: true });
