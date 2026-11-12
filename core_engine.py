@@ -6,9 +6,11 @@ import pygame
 from mediapipe.python.solutions import drawing_utils as mp_drawing  # noqa: F401
 from mediapipe.python.solutions import face_mesh as mp_face_mesh
 
+# Konfigurasi Ambang Batas & Parameter Deteksi EAR
 EAR_THRESHOLD = 0.25 
 EAR_CONSEC_FRAMES = 12 
 
+# Indeks Landmark Mata (MediaPipe Face Mesh)
 LEFT_EYE_INDICES = [362, 385, 387, 263, 373, 380]
 RIGHT_EYE_INDICES = [33, 160, 158, 133, 153, 144]
 
@@ -30,9 +32,11 @@ def calculate_ear(landmarks, eye_indices, img_w, img_h):
 
     ear = (v1 + v2) / (2.0 * h)
     return ear
-
+    
+# Inisialisasi modul suara dari Pygame untuk alarm
 pygame.mixer.init()
 
+# Inisialisasi model MediaPipe Face Mesh dengan opsi konfigurasi
 face_mesh = mp_face_mesh.FaceMesh(
     max_num_faces=1,
     refine_landmarks=True,
@@ -40,28 +44,33 @@ face_mesh = mp_face_mesh.FaceMesh(
     min_tracking_confidence=0.5,
 )
 
+# Inisialisasi pemrosesan kamera
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Error: Kamera tidak dapat diakses.")
     sys.exit()
 
+# Inisialisasi variabel penghitung frame dan status alarm
 frame_counter = 0
 alarm_on = False
 
 print("ENGINE DETEKSI KANTUK AKTIF")
 print("Tekan 'q' pada jendela video untuk keluar.")
 
+# Loop utama untuk membaca stream video secara terus menerus
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
+    # Mirroring tampilan video (efek cermin)
     frame = cv2.flip(frame, 1)
     h, w, _ = frame.shape
 
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = face_mesh.process(rgb_frame)
 
+    # Memproses jika titik landmark wajah terdeteksi
     if results.multi_face_landmarks:
         face_landmarks = results.multi_face_landmarks[0].landmark
 
@@ -69,6 +78,7 @@ while True:
         right_ear = calculate_ear(face_landmarks, RIGHT_EYE_INDICES, w, h)
         avg_ear = (left_ear + right_ear) / 2.0
 
+        # Evaluasi nilai EAR untuk mendeteksi bahaya kantuk
         if avg_ear < EAR_THRESHOLD:
             frame_counter += 1
             if frame_counter >= EAR_CONSEC_FRAMES:
@@ -76,6 +86,7 @@ while True:
                     alarm_on = True
                     pygame.mixer.stop()
 
+                # Menampilkan teks peringatan jika terindikasi mengantuk
                 cv2.putText(
                     frame,
                     "PERINGATAN: BAHAYA KANTUK!",
@@ -89,6 +100,7 @@ while True:
             frame_counter = 0
             alarm_on = False
 
+        # Menentukan warna teks EAR (Merah jika di bawah threshold, Hijau jika aman)
         color = (0, 0, 255) if avg_ear < EAR_THRESHOLD else (0, 255, 0)
         cv2.putText(
             frame,
@@ -109,16 +121,20 @@ while True:
             1,
         )
 
+        # Menggambar titik-titik landmark mata pada frame video
         for eye in [LEFT_EYE_INDICES, RIGHT_EYE_INDICES]:
             for idx in eye:
                 pt = face_landmarks[idx]
                 cx, cy = int(pt.x * w), int(pt.y * h)
                 cv2.circle(frame, (cx, cy), 1, (255, 255, 0), -1)
 
+    # Menampilkan jendela GUI pemrosesan video secara real-time
     cv2.imshow("Drowsiness Detection System", frame)
 
+    # Keluar dari loop jika tombol 'q' ditekan
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
+# Membersihkan dan menutup resource kamera serta jendela OpenCV
 cap.release()
 cv2.destroyAllWindows()
