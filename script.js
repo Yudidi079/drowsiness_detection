@@ -294,9 +294,9 @@ function setStat(id, text, isError) {
   const el = $(id);
   el.innerText = text;
   if (isError) {
-    el.className = "text-rose-300 bg-rose-500/20 border border-rose-400/40 px-2.5 py-0.5 rounded-lg font-bold text-xs";
+    el.className = "text-xs font-bold text-rose-400";
   } else {
-    el.className = "text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-0.5 rounded-lg font-bold text-xs";
+    el.className = "text-xs font-bold text-emerald-400";
   }
 }
 
