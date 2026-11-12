@@ -1,4 +1,5 @@
-git add script.jsconst bgCanvas = document.createElement('canvas');
+// --- BACKGROUND NEURAL / CONSTELLATION PARTICLES EFFECT ---
+const bgCanvas = document.createElement('canvas');
 bgCanvas.id = 'bg_canvas';
 bgCanvas.className = 'fixed inset-0 pointer-events-none z-0 opacity-40';
 document.body.prepend(bgCanvas);
@@ -342,16 +343,16 @@ function onResults(results) {
   }
   canvasCtx.restore();
 }
+
 function playWelcomeVoice() {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const text = "Selamat datang di website Drowsiness Detection System. Harap berkendara dengan hati-hati.";
+    const text = "Selamat datang di website Drawwsiness Detection System. Harap berkendara dengan hati-hati.";
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'id-ID'; 
     utterance.rate = isMobileDevice() ? 1.0 : 1.2;     
     utterance.pitch = 1.1;   
 
-    // Mengambil daftar suara yang tersedia di browser
     let voices = window.speechSynthesis.getVoices();
     let indonesianVoice = voices.find(v => v.lang === 'id-ID' || v.lang === 'id_ID');
     if (indonesianVoice) {
@@ -368,7 +369,6 @@ if ('speechSynthesis' in window) {
   };
 }
 
-// Helper untuk mendeteksi apakah perangkat yang digunakan adalah HP (Mobile)
 function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
@@ -378,9 +378,10 @@ function toggleCamera() {
   if (!isCameraOn) {
     initAudio();
     
-    // Jika dibuka di HP, suara sambutan berbunyi saat tombol Start Kamera diklik
     if (isMobileDevice()) {
-      playWelcomeVoice();
+      setTimeout(() => {
+        playWelcomeVoice();
+      }, 300);
     }
     
     if (!camera) {
