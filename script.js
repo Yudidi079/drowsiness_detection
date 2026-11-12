@@ -137,7 +137,6 @@ function saveParams() {
   if (pSelect === 'custom') {
     const customVal = parseFloat($('custom_ear_input').value);
     if (!customVal || customVal <= 0 || customVal > 0.5) {
-      // Ganti alert validasi dengan SweetAlert kecil juga supaya konsisten
       Swal.fire({
         title: 'Peringatan',
         text: 'Masukkan nilai EAR Kustom yang valid (misal: 0.18)',
@@ -160,11 +159,8 @@ function saveParams() {
   
   $('active_profile_badge').innerText = `Profil: ${currentEyeType} (EAR ${earThreshold})`;
   
-  // BARIS alert(...) YANG BESAR SUDAH DIHAPUS DARI SINI
-  
   closeParamModal();
 
-  // Tampilkan SweetAlert2 yang elegan dan rapi
   Swal.fire({
     title: 'Berhasil Disimpan!',
     html: `
@@ -328,14 +324,14 @@ function onResults(results) {
 
     if (msg !== "NORMAL") {
       statusText.innerText = `[ ${msg} ]`;
-      statusText.className = "text-xs font-extrabold text-white tracking-wide"; // Ukuran proporsional & putih
-      statusBox.className = `bg-[${isDrowsy ? '#e74c3c' : '#e67e22'}] p-2 rounded-xl text-center transition-colors shadow-md`;
+      statusText.className = "text-xs font-extrabold text-white tracking-wide";
+      statusBox.className = `bg-[${isDrowsy ? '#e74c3c' : '#e67e22'}] p-2.5 rounded-lg text-center transition-all duration-300 shadow-sm`;
       if (isDrowsy) playAlarm();
       logEvent(avgEar, mar, msg);
     } else {
       statusText.innerText = "[ NORMAL ]";
-      statusText.className = "text-xs font-extrabold text-white tracking-wide"; // Ukuran proporsional & putih
-      statusBox.className = "bg-[#2ecc71] p-2 rounded-xl text-center transition-colors shadow-md";
+      statusText.className = "text-xs font-extrabold text-white tracking-wide";
+      statusBox.className = "bg-[#2ecc71] p-2.5 rounded-lg text-center transition-all duration-300 shadow-sm";
     }
 
     canvasCtx.fillStyle = '#00FF00';
@@ -373,7 +369,7 @@ function toggleCamera() {
       canvasElement.classList.remove('hidden');
       statusText.innerText = "[ SISTEM MENDETEKSI - KAMERA AKTIF ]";
       statusText.className = "text-xs font-extrabold text-white tracking-wide";
-      statusBox.className = "bg-[#2ecc71] p-2 rounded-xl text-center transition-colors shadow-md";
+      statusBox.className = "bg-[#2ecc71] p-2.5 rounded-lg text-center transition-all duration-300 shadow-sm";
     }).catch(err => {
       console.error("Gagal memulai kamera:", err);
       alert("Tidak dapat mengakses kamera. Pastikan izin kamera aktif.");
@@ -388,7 +384,7 @@ function toggleCamera() {
     canvasElement.classList.add('hidden');
     statusText.innerText = "[ KAMERA NONAKTIF ]";
     statusText.className = "text-xs font-extrabold text-white tracking-wide";
-    statusBox.className = "bg-[#f39c12] p-2 rounded-xl text-center transition-colors shadow-md";
+    statusBox.className = "bg-[#f39c12] p-2.5 rounded-lg text-center transition-all duration-300 shadow-sm";
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     $('ear_val').innerText = $('mar_val').innerText = $('head_val').innerText = "-";
   }
@@ -408,7 +404,7 @@ function openLogModal() {
         <td class="p-2.5 border border-[#283556] font-bold">${l.jenis}</td>
         <td class="p-2.5 border border-[#283556]">${l.tipeMata || 'Standar'}</td>
         <td class="p-2.5 border border-[#283556]">${l.durasi || '3.0 Detik'}</td>
-        <td class="p-2.5 border border-[#283556]"><span class="px-2.5 py-1 rounded-lg text-xs font-bold ${l.status === 'Critical' ? 'bg-rose-500/20 text-rose-300 border border-rose-400/40' : 'bg-amber-500/20 text-amber-300 border border-amber-400/40'}">${l.status}</span></td>
+        <td class="p-2.5 border border-[#283556]"><span class="${l.status === 'Critical' ? 'text-rose-400 font-bold' : 'text-amber-400 font-bold'}">${l.status}</span></td>
       </tr>`;
   });
   $('log_count_info').innerText = logs.length ? `Menampilkan 1 - ${logs.length} dari ${logs.length} data` : 'Menampilkan 0 data';
@@ -419,7 +415,22 @@ const closeLogModal = () => $('log_modal').classList.add('hidden');
 
 function downloadCSV() {
   const logs = JSON.parse(localStorage.getItem('drowsiness_logs') || '[]');
-  if (!logs.length) return alert('Belum ada data log tersimpan.');
+  if (!logs.length) {
+    Swal.fire({
+      title: 'Informasi',
+      text: 'Belum ada data log tersimpan.',
+      icon: 'warning',
+      confirmButtonText: 'Tutup',
+      background: '#141d33',
+      color: '#f8fafc',
+      confirmButtonColor: '#d4b46b',
+      customClass: {
+        popup: 'border border-[#283556] rounded-2xl shadow-2xl font-sans',
+        confirmButton: 'text-[#0c1326] font-extrabold px-5 py-2.5 rounded-xl shadow-lg'
+      }
+    });
+    return;
+  }
   let csv = "No,ID LOG,ID SESI,WAKTU KEJADIAN,JENIS KEJADIAN,TIPE MATA,DURASI,STATUS,EAR,MAR\n";
   logs.forEach((l, i) => { csv += `${i + 1},${l.idLog || 'LOG-'+(i+1)},${l.idSesi || activeSessionId},${l.timestamp},${l.jenis},${l.tipeMata || 'Standar'},${l.durasi || '3.0 Detik'},${l.status},${l.ear},${l.mar}\n`; });
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -439,7 +450,7 @@ function resetLogData() {
     confirmButtonColor: '#e11d48',
     cancelButtonColor: '#283556',
     customClass: {
-      popup: 'border border-[#283556] rounded-2xl shadow-2xl',
+      popup: 'border border-[#283556] rounded-2xl shadow-2xl font-sans',
       confirmButton: 'text-white font-extrabold px-4 py-2 rounded-xl shadow-md',
       cancelButton: 'text-slate-200 font-extrabold px-4 py-2 rounded-xl shadow-md'
     }
@@ -456,7 +467,7 @@ function resetLogData() {
         color: '#f8fafc',
         confirmButtonColor: '#d4b46b',
         customClass: {
-          popup: 'border border-[#283556] rounded-2xl shadow-2xl',
+          popup: 'border border-[#283556] rounded-2xl shadow-2xl font-sans',
           confirmButton: 'text-[#0c1326] font-extrabold px-5 py-2.5 rounded-xl shadow-lg'
         }
       });
@@ -466,7 +477,22 @@ function resetLogData() {
 
 function openChartModal() {
   const logs = JSON.parse(localStorage.getItem('drowsiness_logs') || '[]');
-  if (!logs.length) return alert('Belum ada data kejadian terdeteksi di dalam log.');
+  if (!logs.length) {
+    Swal.fire({
+      title: 'Informasi',
+      text: 'Belum ada data kejadian terdeteksi di dalam log.',
+      icon: 'warning',
+      confirmButtonText: 'Tutup',
+      background: '#141d33',
+      color: '#f8fafc',
+      confirmButtonColor: '#d4b46b',
+      customClass: {
+        popup: 'border border-[#283556] rounded-2xl shadow-2xl font-sans',
+        confirmButton: 'text-[#0c1326] font-extrabold px-5 py-2.5 rounded-xl shadow-lg'
+      }
+    });
+    return;
+  }
 
   $('chart_modal').classList.remove('hidden');
   const hourlyData = {}, totals = { "MENGANTUK": 0, "MENGUAP": 0, "MENGANTUK & MENGUAP": 0 };
