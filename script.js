@@ -136,26 +136,44 @@ function saveParams() {
   const pSelect = $('eye_profile_select').value;
   if (pSelect === 'custom') {
     const customVal = parseFloat($('custom_ear_input').value);
-    if (!customVal || customVal <= 0 || customVal > 0.5) return alert("Masukkan nilai EAR Kustom yang valid (misal: 0.18)");
-    earThreshold = customVal; currentEyeType = "Kustom";
+    if (!customVal || customVal <= 0 || customVal > 0.5) {
+      // Ganti alert validasi dengan SweetAlert kecil juga supaya konsisten
+      Swal.fire({
+        title: 'Peringatan',
+        text: 'Masukkan nilai EAR Kustom yang valid (misal: 0.18)',
+        icon: 'warning',
+        background: '#141d33',
+        color: '#f8fafc',
+        confirmButtonColor: '#d4b46b'
+      });
+      return;
+    }
+    earThreshold = customVal; 
+    currentEyeType = "Kustom";
   } else {
     earThreshold = parseFloat($('input_ear').value);
     currentEyeType = pSelect === '0.25' ? "Standar" : (pSelect === '0.15' ? "Sipit" : "Kustom");
   }
+  
   marThreshold = parseFloat($('input_mar').value);
   consecFrames = parseInt($('input_frames').value);
+  
   $('active_profile_badge').innerText = `Profil: ${currentEyeType} (EAR ${earThreshold})`;
-  alert(`Profil & Parameter berhasil disimpan!\nProfil: ${currentEyeType}\nEAR: ${earThreshold} | MAR: ${marThreshold} | Frame: ${consecFrames}`);
+  
+  // BARIS alert(...) YANG BESAR SUDAH DIHAPUS DARI SINI
+  
   closeParamModal();
 
+  // Tampilkan SweetAlert2 yang elegan dan rapi
   Swal.fire({
     title: 'Berhasil Disimpan!',
     html: `
       <div style="font-size: 13px; color: #cbd5e1; margin-top: 8px;">
         Profil & Parameter berhasil diperbarui.<br>
-        <strong style="color: #d4b46b;">EAR:</strong> ${document.getElementById('input_ear').value} | 
-        <strong style="color: #d4b46b;">MAR:</strong> ${document.getElementById('input_mar').value} | 
-        <strong style="color: #d4b46b;">Frame:</strong> ${document.getElementById('input_frames').value}
+        <strong style="color: #d4b46b;">Profil:</strong> ${currentEyeType}<br>
+        <strong style="color: #d4b46b;">EAR:</strong> ${earThreshold} | 
+        <strong style="color: #d4b46b;">MAR:</strong> ${marThreshold} | 
+        <strong style="color: #d4b46b;">Frame:</strong> ${consecFrames}
       </div>
     `,
     icon: 'success',
@@ -409,9 +427,41 @@ function downloadCSV() {
 }
 
 function resetLogData() {
-  if (confirm('Apakah Anda yakin ingin menghapus seluruh riwayat log & mereset grafik tren?')) {
-    localStorage.removeItem('drowsiness_logs'); alert('Data berhasil direset!'); closeChartModal();
-  }
+  Swal.fire({
+    title: 'Konfirmasi Reset',
+    text: 'Apakah Anda yakin ingin menghapus seluruh riwayat log & mereset grafik tren?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, Reset',
+    cancelButtonText: 'Batal',
+    background: '#141d33',
+    color: '#f8fafc',
+    confirmButtonColor: '#e11d48',
+    cancelButtonColor: '#283556',
+    customClass: {
+      popup: 'border border-[#283556] rounded-2xl shadow-2xl',
+      confirmButton: 'text-white font-extrabold px-4 py-2 rounded-xl shadow-md',
+      cancelButton: 'text-slate-200 font-extrabold px-4 py-2 rounded-xl shadow-md'
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem('drowsiness_logs');
+      closeChartModal();
+      
+      Swal.fire({
+        title: 'Berhasil!',
+        text: 'Data berhasil direset!',
+        icon: 'success',
+        background: '#141d33',
+        color: '#f8fafc',
+        confirmButtonColor: '#d4b46b',
+        customClass: {
+          popup: 'border border-[#283556] rounded-2xl shadow-2xl',
+          confirmButton: 'text-[#0c1326] font-extrabold px-5 py-2.5 rounded-xl shadow-lg'
+        }
+      });
+    }
+  });
 }
 
 function openChartModal() {
@@ -457,5 +507,20 @@ const closeChartModal = () => $('chart_modal').classList.add('hidden');
 
 function closeApp() {
   if (isCameraOn) toggleCamera();
-  alert("Sesi telah diakhiri."); window.location.reload();
+  
+  Swal.fire({
+    title: 'Sesi Berakhir',
+    text: 'Sesi telah diakhiri.',
+    icon: 'info',
+    confirmButtonText: 'OK',
+    background: '#141d33',
+    color: '#f8fafc',
+    confirmButtonColor: '#d4b46b',
+    customClass: {
+      popup: 'border border-[#283556] rounded-2xl shadow-2xl',
+      confirmButton: 'text-[#0c1326] font-extrabold px-5 py-2.5 rounded-xl shadow-lg'
+    }
+  }).then(() => {
+    window.location.reload();
+  });
 }
