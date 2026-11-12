@@ -256,7 +256,7 @@ function estimateHeadPose(lm, w, h) {
   const eyeWidth = Math.abs(lm[263].x - lm[33].x);
   if (eyeWidth > 0) {
     const yaw = (lm[1].x - (lm[263].x + lm[33].x) / 2.0) / eyeWidth;
-    if (yaw > 0.35) return "Menoleh Kanan"; if (yaw < -0.35) return "Menoleh Kiri";
+    if (yaw > 0.35) return "Menoleh Kiri"; if (yaw < -0.35) return "Menoleh Kanan";
   }
 
   const lowerDist = lm[152].y - lm[1].y;
