@@ -351,8 +351,11 @@ function playWelcomeVoice() {
     const text = "Selamat datang di website Drowsiness Detection System. Harap berkendara dengan hati-hati.";
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'id-ID'; 
-    utterance.rate = 1.2;     
-    utterance.pitch = 1.2;   
+    
+    // Atur kecepatan berbeda: HP lebih lambat (0.9), Laptop normal (1.2)
+    utterance.rate = isMobileDevice() ? 0.9 : 1.2;     
+    utterance.pitch = 1.1;   
+    
     window.speechSynthesis.speak(utterance);
   }
 }
@@ -576,7 +579,6 @@ function closeApp() {
 
 // --- LOGIKA UTAMA: PEMISAHAN PERILAKU SUARA (LAPTOP VS HP) ---
 window.addEventListener('DOMContentLoaded', () => {
-  // Jika dibuka di Laptop/PC (Bukan HP), jalankan suara sambutan otomatis di awal
   if (!isMobileDevice()) {
     setTimeout(() => {
       playWelcomeVoice();
