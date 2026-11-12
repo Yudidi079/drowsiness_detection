@@ -344,10 +344,33 @@ function onResults(results) {
   canvasCtx.restore();
 }
 
+// Fungsi utama pemutar suara sambutan
+function playWelcomeVoice() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const text = "Selamat datang di website Drowsiness Detection System. Harap berkendara dengan hati-hati.";
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'id-ID'; 
+    utterance.rate = 1.2;     
+    utterance.pitch = 1.2;   
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+// Helper untuk mendeteksi apakah perangkat yang digunakan adalah HP (Mobile)
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 function toggleCamera() {
   const btn = $('btn_toggle'), statusBox = $('status_box'), statusText = $('status_text');
   if (!isCameraOn) {
     initAudio();
+    
+    // Jika dibuka di HP, suara sambutan berbunyi saat tombol Start Kamera diklik
+    if (isMobileDevice()) {
+      playWelcomeVoice();
+    }
     
     if (!camera) {
       camera = new Camera(videoElement, { 
@@ -551,30 +574,12 @@ function closeApp() {
   });
 }
 
-// --- FITUR SUARA SAMBUTAN OTOMATIS (BISA DI HP & LAPTOP) ---
-let hasWelcomed = false;
-
-function playWelcomeVoice() {
-  if (hasWelcomed) return;
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const text = "Selamat datang di website Drowsiness Detection System. Harap berkendara dengan hati-hati.";
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'id-ID'; 
-    utterance.rate = 1.2;     
-    utterance.pitch = 1.2;   
-    window.speechSynthesis.speak(utterance);
-    hasWelcomed = true;
-  }
-}
-
-// Coba putar otomatis saat halaman dimuat (untuk Laptop/PC)
+// --- LOGIKA UTAMA: PEMISAHAN PERILAKU SUARA (LAPTOP VS HP) ---
 window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    playWelcomeVoice();
-  }, 100);
+  // Jika dibuka di Laptop/PC (Bukan HP), jalankan suara sambutan otomatis di awal
+  if (!isMobileDevice()) {
+    setTimeout(() => {
+      playWelcomeVoice();
+    }, 500);
+  }
 });
-
-// Pemicu pada sentuhan/klik pertama di layar mana saja (Mengatasi blokir autoplay di HP)
-window.addEventListener('click', playWelcomeVoice, { once: true });
-window.addEventListener('touchstart', playWelcomeVoice, { once: true });
