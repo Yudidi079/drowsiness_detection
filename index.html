@@ -39,132 +39,130 @@
  <main class="max-w-7xl w-full mx-auto p-3 flex flex-col md:grid md:grid-cols-3 gap-4 relative z-10 mt-3 pb-32">
    
   <!-- LIVE CAMERA -->
-    <div class="md:col-span-2 bg-[#141d33]/90 backdrop-blur-2xl rounded-2xl border border-[#283556] overflow-hidden flex flex-col shadow-2xl card-glow min-h-[350px] md:min-h-[500px]">
-      <div class="bg-[#1b2642]/90 px-5 py-3 font-bold text-white flex justify-between items-center border-b border-[#283556] shrink-0">
-        <div class="flex items-center gap-3">
-          <span class="relative flex h-3.5 w-3.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-400"></span>
-          </span>
-          <span class="tracking-wide text-white font-black text-base">Live Camera</span>
+<div class="md:col-span-2 bg-white rounded-2xl border border-slate-300 overflow-hidden flex flex-col shadow-2xl min-h-[350px] md:min-h-[500px]">
+  <div class="bg-[#1b2642]/90 px-5 py-3 font-bold text-white flex justify-between items-center border-b border-[#283556] shrink-0">
+    <div class="flex items-center gap-3">
+      <span class="relative flex h-3.5 w-3.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-400"></span>
+      </span>
+      <span class="tracking-wide text-white font-black text-base">Live Camera</span>
+    </div>
+    <span id="active_profile_badge" class="text-xs bg-[#1b2642] text-[#d4b46b] px-3 py-1.5 rounded-lg font-bold border border-[#283556] shadow-sm"> 
+      Profil: Standar (EAR 0.25)
+    </span>
+  </div>
+  
+  <div class="relative flex-1 bg-[#060a14] flex flex-col items-center justify-center overflow-hidden p-2 text-center min-h-[300px]">
+    <video id="webcam" class="hidden" playsinline></video>
+    <canvas id="output_canvas" class="w-full h-full object-contain hidden scale-x-[-1] rounded-xl border border-[#283556] shadow-2xl"></canvas>
+    
+    <div id="cam_placeholder" class="flex flex-col items-center justify-center gap-3 my-auto py-12">
+      <div class="relative">
+        <div class="w-16 h-16 rounded-2xl bg-[#141d33] flex items-center justify-center border border-[#283556] text-[#d4b46b] shadow-xl">
+          <svg class="w-8 h-8 text-[#d4b46b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
         </div>
-        <span id="active_profile_badge" class="text-xs bg-[#d4b46b]/15 text-[#d4b46b] px-3 py-1 rounded-full font-bold border border-[#d4b46b]/30 shadow-sm">
-          Profil: Standar (EAR 0.25)
-        </span>
+        <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full border-2 border-[#060a14] animate-pulse"></div>
       </div>
-      
-      <div class="relative flex-1 bg-[#060a14] flex flex-col items-center justify-center overflow-hidden p-2 text-center min-h-[300px]">
-        <video id="webcam" class="hidden" playsinline></video>
-        <canvas id="output_canvas" class="w-full h-full object-contain hidden scale-x-[-1] rounded-xl border border-[#283556] shadow-2xl"></canvas>
-        
-        <div id="cam_placeholder" class="flex flex-col items-center justify-center gap-3 my-auto py-12">
-          <div class="relative">
-            <div class="w-16 h-16 rounded-2xl bg-[#141d33] flex items-center justify-center border border-[#283556] text-[#d4b46b] shadow-xl">
-              <svg class="w-8 h-8 text-[#d4b46b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full border-2 border-[#060a14] animate-pulse"></div>
-          </div>
-          <div>
-            <p class="text-white font-bold text-sm">Kamera Belum Aktif</p>
-            <p class="text-slate-300 text-xs mt-0.5">Klik tombol <span class="text-emerald-400 font-bold">Start Kamera</span> untuk memulai</p>
-          </div>
-        </div>
+      <div>
+        <p class="text-white font-bold text-sm">Kamera Belum Aktif</p>
+        <p class="text-slate-300 text-xs mt-0.5">Klik tombol <span class="text-emerald-400 font-bold">Start Kamera</span> untuk memulai</p>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- PANEL STATUS & KONTROL -->
+   <!-- PANEL STATUS & KONTROL -->
     <div class="flex flex-col gap-3">
       
      <!-- STATUS PARAMETER -->
-      <div class="bg-[#141d33]/90 backdrop-blur-2xl rounded-2xl border border-[#283556] overflow-hidden shadow-xl shrink-0 card-glow">
-        <div class="bg-[#1b2642]/90 px-4 py-2.5 text-center font-black text-sm text-white tracking-wider uppercase border-b border-[#283556]">
-          Panel Status
-        </div>
-        <div class="p-3 space-y-2 text-xs">
-          <div class="bg-[#0c1326] px-4 py-2.5 rounded-xl border border-[#283556] flex justify-between items-center shadow-inner">
-            <span class="text-white font-semibold text-xs">EAR (mata) : <strong id="ear_val" class="ml-1 text-[#d4b46b] font-mono text-sm font-bold">-</strong></span>
-            <span id="ear_stat" class="text-xs font-bold text-emerald-400">Normal</span>
-          </div>
-          <div class="bg-[#0c1326] px-4 py-2.5 rounded-xl border border-[#283556] flex justify-between items-center shadow-inner">
-            <span class="text-white font-semibold text-xs">MAR (mulut) : <strong id="mar_val" class="ml-1 text-[#d4b46b] font-mono text-sm font-bold">-</strong></span>
-            <span id="mar_stat" class="text-xs font-bold text-emerald-400">Normal</span>
-          </div>
-          <div class="bg-[#0c1326] px-4 py-2.5 rounded-xl border border-[#283556] flex justify-between items-center shadow-inner">
-            <span class="text-white font-semibold text-xs">Kepala : <strong id="head_val" class="ml-1 text-[#d4b46b] font-mono text-sm font-bold">-</strong></span>
-            <span id="head_stat" class="text-xs font-bold text-emerald-400">Normal</span>
-          </div>
-        </div>
-      </div>
+     <div class="bg-white rounded-2xl border border-slate-300 overflow-hidden shadow-xl shrink-0">
+       <div class="bg-[#1b2642]/90 px-4 py-2.5 text-center font-black text-sm text-white tracking-wider uppercase border-b border-[#283556]">
+       Panel Status
+       </div>
+       <div class="p-3 space-y-2 text-xs">
+         <div class="bg-[#0c1326] px-4 py-2.5 rounded-xl border border-[#283556] flex justify-between items-center shadow-inner">
+           <span class="text-white font-semibold text-xs">EAR (mata) : <strong id="ear_val" class="ml-1 text-[#d4b46b] font-mono text-sm font-bold">-</strong></span>
+           <span id="ear_stat" class="text-xs font-bold text-emerald-400">Normal</span>
+         </div>
+         <div class="bg-[#0c1326] px-4 py-2.5 rounded-xl border border-[#283556] flex justify-between items-center shadow-inner">
+           <span class="text-white font-semibold text-xs">MAR (mulut) : <strong id="mar_val" class="ml-1 text-[#d4b46b] font-mono text-sm font-bold">-</strong></span>
+           <span id="mar_stat" class="text-xs font-bold text-emerald-400">Normal</span>
+         </div>
+         <div class="bg-[#0c1326] px-4 py-2.5 rounded-xl border border-[#283556] flex justify-between items-center shadow-inner">
+           <span class="text-white font-semibold text-xs">Kepala : <strong id="head_val" class="ml-1 text-[#d4b46b] font-mono text-sm font-bold">-</strong></span>
+           <span id="head_stat" class="text-xs font-bold text-emerald-400">Normal</span>
+         </div>
+       </div>
+     </div>
 
-      <!-- STATUS SISTEM -->
-      <div class="bg-[#141d33]/90 backdrop-blur-2xl rounded-2xl border border-[#283556] p-3 shadow-xl shrink-0 card-glow">
-        <p class="text-white font-black text-xs tracking-wider uppercase mb-1.5">Status Sistem</p>
-        <div id="status_box" class="bg-[#f39c12] p-2.5 rounded-lg text-center transition-all duration-300 shadow-sm">
-          <p id="status_text" class="text-xs font-extrabold text-white tracking-wide">[KAMERA NONAKTIF]</p>
-        </div>
-      </div>
+     <!-- STATUS SISTEM -->
+     <div class="bg-white rounded-2xl border border-slate-300 p-3 shadow-xl shrink-0">
+       <p class="text-slate-900 font-black text-xs tracking-wider uppercase mb-2">Status Sistem</p>
+       <div id="status_box" class="bg-[#f39c12] px-3 py-2.5 rounded-xl text-center transition-all duration-300 shadow-sm flex items-center justify-center">
+         <p id="status_text" class="text-xs font-extrabold text-white tracking-wide">[KAMERA NONAKTIF]</p>
+       </div>
+     </div>
 
-      <!-- PENGATURAN ALARM SUARA -->
-      <div class="bg-[#141d33]/90 backdrop-blur-2xl rounded-2xl border border-[#283556] p-3 text-xs shadow-xl shrink-0 card-glow">
-        <p class="text-white font-black tracking-wider uppercase mb-2 text-xs">Pengaturan Alarm Suara</p>
-        <div class="flex gap-2">
-          <select id="alarm_select" onchange="changeAlarmType(this.value)" class="flex-1 bg-[#0c1326] text-white border border-[#283556] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#d4b46b] text-xs font-semibold cursor-pointer shadow-inner">
-            <option value="beep">[Beep Standar]</option>
-            <option value="high">[Pitch Tinggi]</option>
-            <option value="siren">[Sirine Darurat]</option>
-            <option value="custom">[Upload Audio .mp3]</option>
-          </select>
-          <button onclick="testAlarm()" class="bg-[#1b2642] hover:bg-[#283556] text-[#d4b46b] px-3.5 py-2.5 rounded-xl font-bold transition border border-[#283556] text-xs active:scale-95 shadow-sm">
-            Tes
-          </button>
-        </div>
-        <div id="custom_audio_container" class="hidden mt-2">
-          <input type="file" id="audio_file_input" accept="audio/*" onchange="handleAudioUpload(event)" class="w-full text-slate-200 bg-[#0c1326] rounded-xl border border-[#283556] cursor-pointer file:mr-2 file:py-2 file:px-3 file:border-0 file:bg-[#1b2642] file:text-[#d4b46b] file:text-xs">
-        </div>
-      </div>
-
-      <!-- KONTROL SESI -->
-      <div class="bg-[#141d33]/90 backdrop-blur-2xl rounded-2xl border border-[#283556] p-3 text-xs shadow-xl shrink-0 card-glow">
-        <p class="text-white font-black tracking-wider uppercase mb-2 text-xs">Kontrol Sesi</p>
-        
-        <button id="btn_toggle" onclick="toggleCamera()" class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold py-3 rounded-xl mb-2.5 transition shadow-lg shadow-emerald-500/25 text-xs flex items-center justify-center gap-1.5 active:scale-98">
-          <span>&#9654;</span> Start Kamera
-        </button>
-        
-        <!-- 4 TOMBOL BERWARNA EMAS -->
-        <div class="grid grid-cols-2 gap-2 mb-2">
-          <button onclick="openParamModal()" class="bg-gradient-to-tr from-[#d4b46b] to-[#c29e4f] hover:from-[#dfc07b] hover:to-[#d4b46b] text-[#0c1326] font-extrabold py-2.5 px-1.5 rounded-xl transition shadow-md shadow-black/30 text-xs text-center active:scale-95">
-            [Atur Parameter]
-          </button>
-          <button onclick="openLogModal()" class="bg-gradient-to-tr from-[#d4b46b] to-[#c29e4f] hover:from-[#dfc07b] hover:to-[#d4b46b] text-[#0c1326] font-extrabold py-2.5 px-1.5 rounded-xl transition shadow-md shadow-black/30 text-xs text-center active:scale-95">
-            [Lihat Log]
-          </button>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-2 mb-2.5">
-          <button onclick="openChartModal()" class="bg-gradient-to-tr from-[#d4b46b] to-[#c29e4f] hover:from-[#dfc07b] hover:to-[#d4b46b] text-[#0c1326] font-extrabold py-2.5 px-1.5 rounded-xl transition shadow-md shadow-black/30 text-xs text-center active:scale-95">
-            [Grafik Tren]
-          </button>
-          <button onclick="resetLogData()" class="bg-gradient-to-tr from-[#d4b46b] to-[#c29e4f] hover:from-[#dfc07b] hover:to-[#d4b46b] text-[#0c1326] font-extrabold py-2.5 px-1.5 rounded-xl transition shadow-md shadow-black/30 text-xs text-center active:scale-95">
-            [Reset Grafik]
-          </button>
-        </div>
-        
-        <!-- TOMBOL AKHIRI SESI -->
-        <button onclick="closeApp()" class="w-full bg-rose-700 hover:bg-rose-600 text-white font-extrabold py-2.5 rounded-xl transition border border-rose-500/40 text-xs active:scale-95 shadow-md">
-          [Akhiri Sesi]
-        </button>
-      </div>
-
-    </div>
-  </main>
-
+     <!-- PENGATURAN ALARM SUARA -->
+     <div class="bg-white rounded-2xl border border-slate-300 p-3 text-xs shadow-xl shrink-0">
+       <p class="text-slate-900 font-black tracking-wider uppercase mb-2 text-xs">Pengaturan Alarm Suara</p>
+       <div class="flex gap-2">
+         <select id="alarm_select" onchange="changeAlarmType(this.value)" class="flex-1 bg-[#0c1326] text-white border border-[#283556] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#d4b46b] text-xs font-semibold cursor-pointer shadow-inner">
+           <option value="beep">[Beep Standar]</option>
+           <option value="high">[Pitch Tinggi]</option>
+           <option value="siren">[Sirine Darurat]</option>
+           <option value="custom">[Upload Audio .mp3]</option>
+         </select>
+         <button onclick="testAlarm()" class="bg-[#1b2642] hover:bg-[#283556] text-[#d4b46b] px-3.5 py-2.5 rounded-xl font-bold transition border border-[#283556] text-xs active:scale-95 shadow-sm">
+           Tes
+         </button>
+       </div>
+       <div id="custom_audio_container" class="hidden mt-2">
+         <input type="file" id="audio_file_input" accept="audio/*" onchange="handleAudioUpload(event)" class="w-full text-slate-200 bg-[#0c1326] rounded-xl border border-[#283556] cursor-pointer file:mr-2 file:py-2 file:px-3 file:border-0 file:bg-[#1b2642] file:text-[#d4b46b] file:text-xs">
+       </div>
+     </div>
+     
+<!-- KONTROL SESI -->
+     <div class="bg-white rounded-2xl border border-slate-300 p-3 text-xs shadow-xl shrink-0">
+       <p class="text-slate-900 font-black tracking-wider uppercase mb-2 text-xs">Kontrol Sesi</p>
+       
+       <!-- TOMBOL START KAMERA (DISEIMBANGKAN SUDUT & BAYANGANNYA) -->
+       <button id="btn_toggle" onclick="toggleCamera()" class="w-full bg-[#059669] hover:bg-[#047857] text-white font-extrabold py-2.5 rounded-xl mb-2.5 transition border border-emerald-600/40 text-xs flex items-center justify-center gap-1.5 active:scale-95 shadow-md">
+         <span>&#9654;</span> Start Kamera
+       </button>
+       
+       <!-- 4 TOMBOL PARAMETER -->
+       <div class="grid grid-cols-2 gap-2 mb-2">
+         <button onclick="openParamModal()" class="bg-[#1e293b] hover:bg-[#334155] text-white font-bold py-2.5 px-1.5 rounded-xl transition shadow-md text-xs text-center active:scale-95 border border-[#334155]">
+           [Atur Parameter]
+         </button>
+         <button onclick="openLogModal()" class="bg-[#1e293b] hover:bg-[#334155] text-white font-bold py-2.5 px-1.5 rounded-xl transition shadow-md text-xs text-center active:scale-95 border border-[#334155]">
+           [Lihat Log]
+         </button>
+       </div>
+       
+       <div class="grid grid-cols-2 gap-2 mb-2.5">
+         <button onclick="openChartModal()" class="bg-[#1e293b] hover:bg-[#334155] text-white font-bold py-2.5 px-1.5 rounded-xl transition shadow-md text-xs text-center active:scale-95 border border-[#334155]">
+           [Grafik Tren]
+         </button>
+         <button onclick="resetLogData()" class="bg-[#1e293b] hover:bg-[#334155] text-white font-bold py-2.5 px-1.5 rounded-xl transition shadow-md text-xs text-center active:scale-95 border border-[#334155]">
+           [Reset Grafik]
+         </button>
+       </div>
+       
+       <!-- TOMBOL AKHIRI SESI -->
+       <button onclick="closeApp()" class="w-full bg-rose-700 hover:bg-rose-600 text-white font-extrabold py-2.5 rounded-xl transition border border-rose-500/40 text-xs active:scale-95 shadow-md">
+         [Akhiri Sesi]
+       </button>
+     </div>
+     
   <!-- MODAL PARAMETER -->
   <div id="param_modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-    <div class="bg-[#141d33] border border-[#283556] rounded-2xl max-w-md w-full overflow-hidden text-xs shadow-2xl modal-animate max-h-[90vh] overflow-y-auto">
-      <div class="bg-[#1b2642] px-5 py-3.5 flex justify-between items-center font-bold text-white border-b border-[#283556]">
+    <div class="bg-[#141d33] border-2 border-slate-200 rounded-2xl max-w-md w-full overflow-hidden text-xs shadow-2xl modal-animate max-h-[90vh] overflow-y-auto">
+      <div class="bg-[#1b2642] px-5 py-3.5 flex justify-between items-center font-bold text-white border-b border-slate-700">
         <h3 class="text-xs tracking-wide text-[#d4b46b]">PROFIL BENTUK MATA & PARAMETER</h3>
         <button onclick="closeParamModal()" class="text-slate-300 hover:text-rose-400 font-mono text-xs px-1 transition">[X]</button>
       </div>
@@ -213,7 +211,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-[#0c1326] px-4 py-3 flex gap-2 border-t border-[#283556]">
+      <div class="bg-[#0c1326] px-4 py-3 flex gap-2 border-t border-slate-700">
         <button onclick="closeParamModal()" class="flex-1 bg-[#1b2642] hover:bg-[#283556] py-2.5 rounded-xl font-bold text-xs text-slate-200 transition border border-[#283556]">
           Batal
         </button>
@@ -226,8 +224,8 @@
 
   <!-- MODAL LOG -->
   <div id="log_modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-    <div class="bg-[#141d33] border border-[#283556] rounded-2xl max-w-4xl w-full overflow-hidden text-xs shadow-2xl modal-animate max-h-[90vh] flex flex-col">
-      <div class="bg-[#1b2642] px-5 py-4 relative flex items-center justify-center font-bold text-white border-b border-[#283556] shrink-0">
+    <div class="bg-[#141d33] border-2 border-slate-200 rounded-2xl max-w-4xl w-full overflow-hidden text-xs shadow-2xl modal-animate max-h-[90vh] flex flex-col">
+      <div class="bg-[#1b2642] px-5 py-4 relative flex items-center justify-center font-bold text-white border-b border-slate-700 shrink-0">
         <h3 class="text-sm tracking-wider text-[#d4b46b] font-black text-center">RIWAYAT CATATAN DETEKSI</h3>
         <button onclick="closeLogModal()" class="absolute right-5 text-slate-300 hover:text-rose-400 font-mono text-sm px-1 transition">[X]</button>
       </div>
@@ -267,8 +265,8 @@
   
   <!-- MODAL GRAFIK -->
   <div id="chart_modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-    <div class="bg-[#141d33] border border-[#283556] rounded-2xl max-w-4xl w-full p-5 max-h-[85vh] overflow-y-auto shadow-2xl modal-animate">
-      <div class="flex justify-between items-center mb-4 border-b border-[#283556] pb-3">
+    <div class="bg-[#141d33] border-2 border-slate-200 rounded-2xl max-w-4xl w-full p-5 max-h-[85vh] overflow-y-auto shadow-2xl modal-animate">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
         <h3 class="text-xs font-bold text-[#d4b46b] tracking-wide">ANALISIS TREN KANTUK & MENGUAP</h3>
         <div class="flex gap-2">
           <button onclick="resetLogData()" class="bg-rose-700 hover:bg-rose-600 border border-rose-500/40 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition">

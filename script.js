@@ -550,3 +550,22 @@ function closeApp() {
     window.location.reload();
   });
 }
+
+// Fungsi untuk menyambut pengguna saat halaman pertama kali dimuat
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const text = "Selamat datang di website Drowwsiness Detection System. Harap berkendara dengan hati-hati.";
+      
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID'; 
+        utterance.rate = 1.2;     
+        utterance.pitch = 1.2;   
+        
+        
+        window.speechSynthesis.speak(utterance);
+      }
+    }, 100); 
+  });
+
+  
