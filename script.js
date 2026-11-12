@@ -1,5 +1,4 @@
-// --- BACKGROUND NEURAL / CONSTELLATION PARTICLES EFFECT ---
-const bgCanvas = document.createElement('canvas');
+git add script.jsconst bgCanvas = document.createElement('canvas');
 bgCanvas.id = 'bg_canvas';
 bgCanvas.className = 'fixed inset-0 pointer-events-none z-0 opacity-40';
 document.body.prepend(bgCanvas);
