@@ -343,21 +343,30 @@ function onResults(results) {
   }
   canvasCtx.restore();
 }
-
-// Fungsi utama pemutar suara sambutan
 function playWelcomeVoice() {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const text = "Selamat datang di website Drowsiness Detection System. Harap berkendara dengan hati-hati.";
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'id-ID'; 
-    
-    // Atur kecepatan berbeda: HP lebih lambat (0.9), Laptop normal (1.2)
-    utterance.rate = isMobileDevice() ? 0.9 : 1.2;     
+    utterance.rate = isMobileDevice() ? 1.0 : 1.2;     
     utterance.pitch = 1.1;   
-    
+
+    // Mengambil daftar suara yang tersedia di browser
+    let voices = window.speechSynthesis.getVoices();
+    let indonesianVoice = voices.find(v => v.lang === 'id-ID' || v.lang === 'id_ID');
+    if (indonesianVoice) {
+      utterance.voice = indonesianVoice;
+    }
+
     window.speechSynthesis.speak(utterance);
   }
+}
+
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
 }
 
 // Helper untuk mendeteksi apakah perangkat yang digunakan adalah HP (Mobile)
