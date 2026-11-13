@@ -586,7 +586,7 @@ function closeApp() {
   });
 }
 
-// --- LOGIKA UTAMA: PEMISAHAN PERILAKU SUARA (LAPTOP VS HP) ---
+// --- PEMISAHAN PERILAKU SUARA (LAPTOP VS HP) ---
 window.addEventListener('DOMContentLoaded', () => {
   if (!isMobileDevice()) {
     setTimeout(() => {
