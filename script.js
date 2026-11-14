@@ -551,7 +551,7 @@ function openChartModal() {
         { label: 'Menguap', data: hours.map(h => hourlyData[h].yawn), backgroundColor: '#e67e22' },
         { label: 'Keduanya', data: hours.map(h => hourlyData[h].both), backgroundColor: '#8e44ad' }
       ]
-    }, options: { responsive: true, plugins: { legend: { labels: { color: '#333' } } } }
+    }, options: { responsive: true, plugins: { legend: { labels: { color: '#f8fafc' } } } }
   });
 
   if (pieChartInstance) pieChartInstance.destroy();
@@ -560,7 +560,7 @@ function openChartModal() {
     data: {
       labels: ['Mengantuk', 'Menguap', 'Mengantuk & Menguap'],
       datasets: [{ data: [totals["MENGANTUK"], totals["MENGUAP"], totals["MENGANTUK & MENGUAP"]], backgroundColor: ['#e74c3c', '#e67e22', '#8e44ad'] }]
-    }, options: { responsive: true, plugins: { legend: { labels: { color: '#333' } } } }
+    }, options: { responsive: true, plugins: { legend: { labels: { color: '#f8fafc' } } } }
   });
 }
 
